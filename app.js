@@ -1,6 +1,6 @@
 (() => {
   const MAX_NUMBERS = 5000;
-  const COLORS = ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6', '#14b8a6'];
+  const COLORS = ['#ffd6e0', '#ffe8c2', '#fff6b8', '#d4f5c9', '#c7f0f2', '#cfe0ff', '#e4d4ff', '#fbd3f2'];
   const STORE = 'ruleta-rifa-v1';
 
   const $ = (id) => document.getElementById(id);
@@ -50,13 +50,17 @@
     return { a, b };
   }
 
-  function rebuild() {
+  function rebuild(keepOrder = false) {
     const r = readRange();
     errorEl.textContent = r.error || '';
     if (r.error) { numbers = []; spinBtn.disabled = true; infoEl.textContent = ''; draw(); return; }
     const out = removeWinners ? new Set(winners) : new Set();
-    numbers = [];
-    for (let n = r.a; n <= r.b; n++) if (!out.has(n)) numbers.push(n);
+    if (keepOrder && numbers.length) {
+      numbers = numbers.filter((n) => !out.has(n));
+    } else {
+      numbers = [];
+      for (let n = r.a; n <= r.b; n++) if (!out.has(n)) numbers.push(n);
+    }
     spinBtn.disabled = spinning || numbers.length < 1;
     infoEl.textContent = numbers.length
       ? `${numbers.length} número${numbers.length === 1 ? '' : 's'} en la ruleta (${r.a} a ${r.b}).`
@@ -69,13 +73,15 @@
     ctx.clearRect(0, 0, W, W);
     const n = numbers.length;
     if (!n) {
-      ctx.fillStyle = '#9996'; ctx.beginPath(); ctx.arc(c, c, R, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#e5e7f0'; ctx.beginPath(); ctx.arc(c, c, R, 0, Math.PI * 2); ctx.fill();
       return;
     }
     const step = (Math.PI * 2) / n;
     ctx.save();
     ctx.translate(c, c);
     ctx.rotate(angle);
+    ctx.lineWidth = n > 300 ? 0 : 1;
+    ctx.strokeStyle = '#ffffffaa';
     for (let i = 0; i < n; i++) {
       ctx.beginPath();
       ctx.moveTo(0, 0);
@@ -83,11 +89,12 @@
       ctx.closePath();
       ctx.fillStyle = COLORS[i % COLORS.length];
       ctx.fill();
+      if (ctx.lineWidth) ctx.stroke();
     }
     // etiquetas solo si caben (alto del sector >= ~14px)
     const fontPx = Math.min(36, (step * R * 0.8) * 0.75);
     if (fontPx >= 10) {
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = '#2b2d42';
       ctx.font = `700 ${fontPx}px system-ui, sans-serif`;
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
@@ -137,7 +144,7 @@
     if (dialog.showModal) dialog.showModal(); else alert(`Ganador: ${num}`);
     save();
     if (removeWinners) { angle = 0; }
-    rebuild();
+    rebuild(true);
   }
 
   function renderHistory() {
@@ -161,6 +168,19 @@
     removeWinners = !removeWinners;
     toggleBtn.setAttribute('aria-pressed', removeWinners);
     save(); rebuild();
+  });
+  $('shuffle').addEventListener('click', () => {
+    if (spinning) return;
+    for (let i = numbers.length - 1; i > 0; i--) {
+      const j = randInt(i + 1);
+      [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+    }
+    angle = 0; draw();
+  });
+  $('sort').addEventListener('click', () => {
+    if (spinning) return;
+    numbers.sort((a, b) => a - b);
+    angle = 0; draw();
   });
   $('clear').addEventListener('click', () => {
     winners = []; renderHistory(); save(); rebuild();
