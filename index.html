@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ruleta de Rifas</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <section class="wheel-area">
+      <div class="wheel-wrap">
+        <div class="pointer" aria-hidden="true"></div>
+        <canvas id="wheel" width="800" height="800" aria-label="Ruleta de números"></canvas>
+        <button id="spin" class="spin-btn" type="button">GIRAR</button>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <h1>Ruleta de Rifas</h1>
+
+      <form id="range-form" class="range" novalidate>
+        <label>Número inicial
+          <input id="start" type="number" step="1" value="1" inputmode="numeric">
+        </label>
+        <label>Número final
+          <input id="end" type="number" step="1" value="50" inputmode="numeric">
+        </label>
+      </form>
+      <p id="info" class="info"></p>
+      <p id="error" class="error" role="alert"></p>
+
+      <div class="actions">
+        <button id="remove-winners" type="button" class="toggle" aria-pressed="false">
+          Quitar ganadores de la ruleta
+        </button>
+      </div>
+
+      <div class="results-head">
+        <h2>Resultados</h2>
+        <button id="clear" type="button" class="link">Borrar historial</button>
+      </div>
+      <ol id="history" class="history"></ol>
+    </aside>
+  </main>
+
+  <dialog id="winner-dialog">
+    <p class="label">¡Número ganador!</p>
+    <p id="winner-number" class="big"></p>
+    <form method="dialog"><button class="primary">Cerrar</button></form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
